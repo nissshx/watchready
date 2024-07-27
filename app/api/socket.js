@@ -12,6 +12,7 @@ const SocketHandler = (req, res) => {
       socket.on('join-room', (roomId) => {
         socket.join(roomId);
         console.log(`User joined room: ${roomId}`);
+        socket.to(roomId).emit('request-video-url');
       });
 
       socket.on('video-state-update', (data) => {
@@ -19,6 +20,14 @@ const SocketHandler = (req, res) => {
           currentTime: data.currentTime,
           isPlaying: data.isPlaying,
         });
+      });
+
+      socket.on('video-uploaded', (data) => {
+        io.to(data.roomId).emit('video-uploaded', data.url);
+      });
+
+      socket.on('share-video-url', (data) => {
+        socket.to(data.roomId).emit('video-uploaded', data.url);
       });
     });
   }
